@@ -18,15 +18,24 @@ function fetchGitHubOrganization() {
         .chain()
         .select(
           function hasMoreThanOneFollower(user) {
-            return user.followers_count > "1"
+            return (user.followers_count > "1");
           }
         ).each(
           function updateUser(user) {
-            // Find user
-          }
-        );
-    }
-  )
+            console.log("Trying to update github user " + user.login);
+            db.json.find.first(
+              { github_login: user.login },
+              function userAlreadyInDb(err,response) {
+                if(err) {
+                  console.log(err); 
+                  return;
+                }
+                var userFromDb = response.results[0];
+                console.log(userFromDb);
+              }
+            );
+        });
+  })
 }
 
 fetchGitHubOrganization();
