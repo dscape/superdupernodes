@@ -21,17 +21,42 @@ function fetchGitHubOrganization() {
             return (user.followers_count > "1");
           }
         ).each(
-          function updateUser(user) {
-            console.log("Trying to update github user " + user.login);
-            db.json.find.first(
-              { github_login: user.login },
+          function updateUser(ghUser) {
+            console.log("Trying to update github user " + ghUser.login);
+            db.json.first(
+              { github_login: ghUser.login },
               function userAlreadyInDb(err,response) {
                 if(err) {
                   console.log(err); 
                   return;
                 }
-                var userFromDb = response.results[0];
-                console.log(userFromDb);
+                var updatedUser = response.results && response.results[0],
+                    uri;
+                if(updatedUser) {
+                  console.log("Found " + ghUser.login);
+                  uri = updatedUser.uri;
+                  updatedUser = updatedUser.content;
+                }
+                else {
+                  console.log(ghUser.login + " is a new user");
+                  updatedUser = {};
+                  updatedUser.github_login = ghUser.login;
+                  uri = "github/" + ghUser.login;
+                }
+                updatedUser.github =  ghUser;
+                db.json.insert(uri, updatedUser, 
+                  {collection: "github"},
+                  function updateCb(e) {
+                    if(e) {
+                      console.log("Couldn't update " + ghUser.login);
+                      return;
+                    }
+                    else {
+                       console.log(ghUser.login + " updated");
+                       return;
+                    }
+                  }
+                )
               }
             );
         });
