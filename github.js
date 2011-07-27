@@ -55,12 +55,10 @@ function fetchGitHubOrganization() {
                        console.log(ghUser.login + " updated");
                        return;
                     }
-                  }
-                )
-              }
-            );
+                  });
+              });
         });
-  })
+  });
 }
 
 fetchGitHubOrganization();
