@@ -55,6 +55,8 @@ function fetchGitHubOrganization() {
                   console.log(ghUser.login + " is a new user");
                   updatedUser = {};
                   updatedUser.github_login = ghUser.login;
+                  updatedUser.gravatar_id = 
+                    updatedUser.gravatar_id || ghUser.gravatar_id;
                   uri = "github/" + ghUser.login;
                 }
                 updatedUser.github =  ghUser;
