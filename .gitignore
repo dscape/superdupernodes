@@ -1,4 +1,5 @@
 .DS_Store
 cfg/marklogic.js
+cfg/meetup.js
 node_modules/
 npm-*.log
