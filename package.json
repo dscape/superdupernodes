@@ -1,0 +1,19 @@
+{ "name": "superdupernodes"
+, "version": "0.0.1"
+, "keywords": 
+  [ "MarkLogic"
+  , "DMC"
+  , "github"
+  , "twitter"
+  ]
+, "description": "Scrape APIs for information about the MarkLogic Community"
+, "contributors": [ "Nuno Job <nunojobpinto@gmail.com> (http://nunojob.com)" ]
+, "scripts": 
+  { "github": "node jobs/github.js" 
+  }
+, "dependencies":
+  { "request": "2.0.1"
+  , "underscore": "1.1.7"
+  , "nuvem": "0.0.1"
+  }
+}

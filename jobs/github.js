@@ -1,10 +1,8 @@
-// npm install request && npm install underscore
 var request = require("request")
   , _       = require("underscore")
   , nuvem   = require("nuvem")
-  , cfg     = require("./cfg/marklogic");
-
-var db    = nuvem(cfg);
+  , cfg     = require("../cfg/marklogic")
+  , db      = nuvem(cfg);
 
 function fetchGitHubOrganization() {
   request.get(
