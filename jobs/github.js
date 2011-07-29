@@ -1,8 +1,24 @@
 var request = require("request")
   , _       = require("underscore")
+  , exec    = require('child_process').exec
   , nuvem   = require("nuvem")
   , cfg     = require("../cfg/marklogic")
   , db      = nuvem(cfg);
+
+function jsonInsert(uri, updatedUser) {
+  db.json.insert(uri, updatedUser,
+    {collection: "github"},
+    function updateCb(e) {
+      if(e) {
+        console.log("Couldn't update " + uri);
+        return;
+      }
+      else {
+         console.log(uri + " updated");
+         return;
+      }
+  });
+}
 
 function fetchGitHubOrganization() {
   request.get(
@@ -42,18 +58,23 @@ function fetchGitHubOrganization() {
                   uri = "github/" + ghUser.login;
                 }
                 updatedUser.github =  ghUser;
-                db.json.insert(uri, updatedUser, 
-                  {collection: "github"},
-                  function updateCb(e) {
+                exec(("node " + __dirname + "/../utils/github/top-repos.js " + ghUser.login), 
+                  function topReposCb(e, stdout, stderr) {
                     if(e) {
-                      console.log("Couldn't update " + ghUser.login);
-                      return;
+                      console.log("Fetching top repos failed for " + ghUser.login);
+                      jsonInsert(uri, updatedUser);
                     }
-                    else {
-                       console.log(ghUser.login + " updated");
-                       return;
+                    try {
+                      var github_repos = JSON.parse(stdout);
+                      updatedUser.github_repos = github_repos;
+                      jsonInsert(uri, updatedUser);
                     }
-                  });
+                    catch (exc) {
+                      console.log("Fetching top repos for " + ghUser.login + " yielded invalid json");
+                      jsonInsert(uri, updatedUser);
+                    }
+                  }
+                )
               });
         });
   });
