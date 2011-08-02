@@ -3,26 +3,27 @@ var request = require("request")
   , exec    = require('child_process').exec
   , nuvem   = require("nuvem")
   , cfg     = require("../cfg/marklogic")
+  , gh_cfg  = require("../cfg/github")
   , db      = nuvem(cfg);
 
 function jsonInsert(uri, updatedUser) {
   db.json.insert(uri, updatedUser,
-    {collection: "github"},
+    {collection: ["github", "organization:" + gh_cfg.organization]},
     function updateCb(e) {
       if(e) {
         console.log("Couldn't update " + uri);
         return;
       }
       else {
-         console.log(uri + " updated");
-         return;
+        console.log(uri + " updated");
+        return;
       }
   });
 }
 
 function fetchGitHubOrganization() {
   request.get(
-    "http://github.com/api/v2/json/organizations/marklogic/public_members",
+    "http://github.com/api/v2/json/organizations/" + gh_cfg.organization + "/public_members",
     function (err, response, body) {
       if(err) {
         console.log(err); 
@@ -32,11 +33,11 @@ function fetchGitHubOrganization() {
         .chain()
         .select(
           function hasMoreThanOneFollower(user) {
-            return (user.followers_count > "1");
+            return (user.followers_count > gh_cfg.min_followers);
           }
         ).each(
           function updateUser(ghUser) {
-            console.log("Trying to update github user " + ghUser.login);
+            console.log("Processing github user " + ghUser.login);
             db.json.first(
               { github_login: ghUser.login },
               function userAlreadyInDb(err,response) {
@@ -57,26 +58,26 @@ function fetchGitHubOrganization() {
                   updatedUser.github_login = ghUser.login;
                   updatedUser.gravatar_id = 
                     updatedUser.gravatar_id || ghUser.gravatar_id;
+                  if(ghUser.company.match(/MarkLogic/)) {
+                    updatedUser.company = "MarkLogic";
+                  }
                   uri = "github/" + ghUser.login;
                 }
                 updatedUser.github =  ghUser;
-                exec(("node " + __dirname + "/../utils/github/top-repos.js " + ghUser.login), 
+                exec(("node " + __dirname + "/../utils/github/top-repos.js " + 
+                  ghUser.login + " " + gh_cfg.max_repos), 
                   function topReposCb(e, stdout, stderr) {
-                    if(e) {
-                      console.log("Fetching top repos failed for " + ghUser.login);
-                      jsonInsert(uri, updatedUser);
-                    }
                     try {
+                      if(e) { throw e; }
                       var github_repos = JSON.parse(stdout);
                       updatedUser.github_repos = github_repos;
-                      jsonInsert(uri, updatedUser);
                     }
                     catch (exc) {
                       console.log("Fetching top repos for " + ghUser.login + " yielded invalid json");
-                      jsonInsert(uri, updatedUser);
                     }
+                    jsonInsert(uri, updatedUser);
                   }
-                )
+                );
               });
         });
   });

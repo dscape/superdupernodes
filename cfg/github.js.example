@@ -1,0 +1,5 @@
+module.exports = 
+  { organization: "marklogic"
+  , min_followers: 1
+  , max_repos: 3
+  };
