@@ -12,7 +12,7 @@ function possibleMatches(member) {
   // Search for name but remove things with profile url to avoid dups
   db.json.find(member.name + " -meetup", function (err,response) {
       if(response.meta.total > 0) {
-        var uri = "/meetup/" + member.member_id
+        var uri = ("/meetup/" + member.group.group_urlname + "/" + member.member_id)
           , collections;
         console.log(member.name + " seems to have " + response.meta.total + 
           " possible matches");
