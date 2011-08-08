@@ -58,7 +58,7 @@ function fetchGitHubOrganization() {
                   updatedUser.github_login = ghUser.login;
                   updatedUser.gravatar_id = 
                     updatedUser.gravatar_id || ghUser.gravatar_id;
-                  if(ghUser.company.match(/MarkLogic/)) {
+                  if(ghUser.company && ghUser.company.match(/MarkLogic/)) {
                     updatedUser.company = "MarkLogic";
                   }
                   uri = "github/" + ghUser.login;

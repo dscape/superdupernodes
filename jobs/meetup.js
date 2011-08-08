@@ -1,6 +1,7 @@
 var request    = require("request")
   , nuvem      = require("nuvem")
   , async      = require("async")
+  , _          = require('underscore')
   , cfg        = require("../cfg/marklogic")
   , meetup_api = require("../cfg/meetup")
   , api_key    = meetup_api.api_key
@@ -8,7 +9,27 @@ var request    = require("request")
   , db         = nuvem(cfg);
 
 function possibleMatches(member) {
-  console.log(member.name);
+  // Search for name but remove things with profile url to avoid dups
+  db.json.find(member.name + " -meetup", function (err,response) {
+      if(response.meta.total > 0) {
+        var uri = "/meetup/" + member.member_id
+          , collections;
+        console.log(member.name + " seems to have " + response.meta.total + 
+          " possible matches");
+        member.tentative = response;
+        collections = _.map(response.results, function (r) { return r.uri; });
+        db.json.insert(uri, member, {collection: collections},
+          function (err) {
+            if(err) { 
+              console.log("failed creating member " + uri);
+              return;
+            }
+            console.log("User " + uri + " was created.");
+          }
+        );
+      }
+    }
+  );
 }
 
 function findMembers(group) {
@@ -17,9 +38,14 @@ function findMembers(group) {
     function (e,h,b) {
       try {
         if(e) { throw e; }
-        var member = JSON.parse(b);
-        console.log(member.results[0].name);
-        async.forEach(member.results, possibleMatches,
+        var member = JSON.parse(b)
+          , members = _.map(member.results,
+              function(member){
+                member.group = group;
+                return member;
+              }
+            );
+        async.forEach(members, possibleMatches,
           function (err){
             if(err) { console.log(err); return; }
           });
@@ -41,7 +67,6 @@ request.get(
     }
     try {
       var meetups = JSON.parse(b);
-      //console.log(meetups.results[0]);
       async.forEach(meetups.results, findMembers,
         function(err){
           if(e) {
