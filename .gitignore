@@ -3,5 +3,6 @@ cfg/marklogic.js
 cfg/meetup.js
 cfg/github.js
 cfg/markmail.js
+cfg/express.js
 node_modules/
 *.log
