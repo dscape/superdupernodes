@@ -1,0 +1,19 @@
+module.exports = 
+  { host: "127.0.0.1"
+  , port: 80
+  , "secret": "secret"
+  , "oauth": 
+    { "twitter": 
+      { "consumerKey": "twitter-consumer-key"
+      , "consumerSecret": "twitter-consumer-secret"
+      }
+    , "facebook": 
+      { "appId": "facebook-app-id"
+      , "appSecret": "facebook-app-secret"
+      }
+    , "github":
+      { "appId": "github-app-id"
+      , "appSecret": "github-app-secret"
+      }
+  }
+};

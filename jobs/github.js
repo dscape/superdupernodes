@@ -39,7 +39,7 @@ function fetchGitHubOrganization() {
           function updateUser(ghUser) {
             console.log("Processing github user " + ghUser.login);
             db.json.first(
-              { github_login: ghUser.login },
+              ghUser.login  + " -excludefromsearch",
               function userAlreadyInDb(err,updatedUser) {
                 if(err) {
                   console.log(err); 

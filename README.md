@@ -1,12 +1,18 @@
 # Installing
 
+      # Install node
       npm install
+      # Configure where mljson lives
       mv config/marklogic.js.example config/marklogic.js
       vi config/marklogic.js
       # Rename .example's to .js
-      # Set up the cron jobs
+      mv config/markmail.js.example config/markmail.js
+      mv config/meetup.js.example config/meetup.js
+      mv config/express.js.example config/express.js
+      # Add API key to meetup
+      vi config/meetup.js
 
-# Right now
+# Running
 
-      node jobs/github.js
-      node jobs/meetups.js
+      # Run the scripts
+      ./run_jobs
