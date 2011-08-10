@@ -9,15 +9,17 @@ var request    = require("request")
   , db         = nuvem(cfg);
 
 function possibleMatches(member) {
-  // Search for name but remove things with profile url to avoid dups
-  db.json.find(member.name + " -meetup", function (err,response) {
+  // Search for name but remove things with meetup to avoid dups
+  db.json.find(member.name + " -excludefromsearch", function (err,response) {
       if(response.meta.total > 0) {
         var uri = ("/meetup/" + member.group.group_urlname + "/" + member.member_id)
           , collections;
         console.log(member.name + " seems to have " + response.meta.total + 
           " possible matches");
         member.tentative = response;
+        member.exclude_from_search = "excludefromsearch"; 
         collections = _.map(response.results, function (r) { return r.uri; });
+        collections.push("meetup");
         db.json.insert(uri, member, {collection: collections},
           function (err) {
             if(err) { 

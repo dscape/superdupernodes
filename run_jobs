@@ -1,0 +1,3 @@
+node jobs/github.js > "github.log"
+node jobs/meetup    > "meetup.log" &
+node jobs/markmail  > "markmail.log" &

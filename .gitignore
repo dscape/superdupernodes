@@ -3,4 +3,4 @@ cfg/marklogic.js
 cfg/meetup.js
 cfg/github.js
 node_modules/
-npm-*.log
+*.log

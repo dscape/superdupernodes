@@ -8,7 +8,7 @@ var request = require("request")
 
 function jsonInsert(uri, updatedUser) {
   db.json.insert(uri, updatedUser,
-    {collection: ["github", "organization:" + gh_cfg.organization]},
+    {collection: [("/" + uri), "github", ("organization:" + gh_cfg.organization)]},
     function updateCb(e) {
       if(e) {
         console.log("Couldn't update " + uri);
@@ -32,21 +32,20 @@ function fetchGitHubOrganization() {
       var members = _(JSON.parse(body).users)
         .chain()
         .select(
-          function hasMoreThanOneFollower(user) {
-            return (user.followers_count > gh_cfg.min_followers);
+          function hasMoreThanXFollowers(user) {
+            return (user.followers_count >= gh_cfg.min_followers);
           }
         ).each(
           function updateUser(ghUser) {
             console.log("Processing github user " + ghUser.login);
             db.json.first(
               { github_login: ghUser.login },
-              function userAlreadyInDb(err,response) {
+              function userAlreadyInDb(err,updatedUser) {
                 if(err) {
                   console.log(err); 
                   return;
                 }
-                var updatedUser = response.results && response.results[0],
-                    uri;
+                var uri;
                 if(updatedUser) {
                   console.log("Found " + ghUser.login);
                   uri = updatedUser.uri;
